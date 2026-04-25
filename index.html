@@ -1,51 +1,20 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Физическая песочница</title>
+    <style>
+        /* Убираем все отступы и прячем полосы прокрутки */
+        body { margin: 0; overflow: hidden; background: #2f3542; }
+        canvas { display: block; background: #ffffff; }
+    </style>
+</head>
+<body>
 
-// Растягиваем холст на всё окно
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    <canvas id="gameCanvas"></canvas>
 
-// Настройки кубикаа
-let box = {
-    x: 100,
-    y: 100,
-    size: 60,
-    color: '#ff4757',
-    isDragging: false
-};
-
-function isMouseInBox(mx, my, b) {
-    return mx > b.x && mx < b.x + b.size && my > b.y && my < b.y + b.size;
-}
-
-canvas.addEventListener('mousedown', (e) => {
-    if (isMouseInBox(e.offsetX, e.offsetY, box)) {
-        box.isDragging = true;
-    }
-});
-
-window.addEventListener('mousemove', (e) => {
-    if (box.isDragging) {
-        box.x = e.offsetX - box.size / 2;
-        box.y = e.offsetY - box.size / 2;
-    }
-});
-
-window.addEventListener('mouseup', () => {
-    box.isDragging = false;
-});
-
-// Функция отрисовки
-function draw() {
-    // Очищаем экран под размер окна
-    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    <!-- Подключаем логику из отдельного файла -->
+    <script src="script.js"></script>
     
-    // Рисуем кубик
-    ctx.fillStyle = box.color;
-    ctx.fillRect(box.x, box.y, box.size, box.size);
-
-    requestAnimationFrame(draw);
-}
-
-// Запускаем
-draw();
+</body>
+</html>
