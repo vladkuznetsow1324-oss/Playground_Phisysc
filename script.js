@@ -1,49 +1,54 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Растягиваем на весь экран
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
 
 let box = {
     x: 100,
     y: 100,
-    size: 80, // Сделаем чуть побольше, чтобы легче попадать
+    size: 100, // Сделал еще больше, чтобы точно не промахнуться
     color: '#ff4757',
     isDragging: false,
     vy: 0,
-    gravity: 0.9, // Увеличил гравитацию (было 0.5)
-    bounce: -0.6  // Сила отскока
+    gravity: 0.8
 };
 
-// Функция проверки попадания мышки
-function isMouseInBox(mx, my, b) {
-    return mx > b.x && mx < b.x + b.size && my > b.y && my < b.y + b.size;
+// Исправленный расчет координат мыши
+function getMousePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+    };
 }
 
 canvas.addEventListener('mousedown', (e) => {
-    // Используем clientX/Y для точности
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    if (isMouseInBox(mouseX, mouseY, box)) {
+    const mouse = getMousePos(e);
+    // Проверка попадания
+    if (mouse.x > box.x && mouse.x < box.x + box.size && 
+        mouse.y > box.y && mouse.y < box.y + box.size) {
         box.isDragging = true;
-        box.vy = 0; // Останавливаем падение при захвате
+        box.vy = 0;
+        box.color = '#2ed573'; // Станет зеленым при захвате
     }
 });
 
 window.addEventListener('mousemove', (e) => {
     if (box.isDragging) {
-        const rect = canvas.getBoundingClientRect();
-        box.x = (e.clientX - rect.left) - box.size / 2;
-        box.y = (e.clientY - rect.top) - box.size / 2;
-        box.vy = 0; 
+        const mouse = getMousePos(e);
+        box.x = mouse.x - box.size / 2;
+        box.y = mouse.y - box.size / 2;
     }
 });
 
 window.addEventListener('mouseup', () => {
     box.isDragging = false;
+    box.color = '#ff4757'; // Снова красный
 });
 
 function update() {
@@ -51,12 +56,9 @@ function update() {
         box.vy += box.gravity;
         box.y += box.vy;
 
-        // Пол
         if (box.y + box.size > canvas.height) {
             box.y = canvas.height - box.size;
-            box.vy *= box.bounce; // Отскок
-            
-            // Остановка мелкого дрожания
+            box.vy *= -0.5;
             if (Math.abs(box.vy) < 1) box.vy = 0;
         }
     }
@@ -65,11 +67,8 @@ function update() {
 function draw() {
     update();
     ctx.clearRect(0, 0, canvas.width, canvas.height); 
-    
-    // Рисуем кубик с небольшой тенью для красоты
     ctx.fillStyle = box.color;
     ctx.fillRect(box.x, box.y, box.size, box.size);
-
     requestAnimationFrame(draw);
 }
 
