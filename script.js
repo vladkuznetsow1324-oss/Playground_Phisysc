@@ -11,17 +11,17 @@ resize();
 let box = {
     x: 100,
     y: 100,
-    size: 100, // Сделал еще больше, чтобы точно не промахнуться
+    size: 80,
     color: '#ff4757',
     isDragging: false,
-    vy: 0,
-    gravity: 0.8
-    vx: 0, // скорость по горизонтали
-    lastY: 0
-    lastX:, 0
+    vx: 0,         // Скорость по горизонтали
+    vy: 0,         // Скорость по вертикали
+    gravity: 0.8,
+    bounce: -0.6,
+    lastX: 100,    // Для расчета силы броска
+    lastY: 100
 };
 
-// Исправленный расчет координат мыши
 function getMousePos(e) {
     const rect = canvas.getBoundingClientRect();
     return {
@@ -32,18 +32,30 @@ function getMousePos(e) {
 
 canvas.addEventListener('mousedown', (e) => {
     const mouse = getMousePos(e);
-    // Проверка попадания
     if (mouse.x > box.x && mouse.x < box.x + box.size && 
         mouse.y > box.y && mouse.y < box.y + box.size) {
         box.isDragging = true;
+        box.vx = 0;
         box.vy = 0;
-        box.color = '#2ed573'; // Станет зеленым при захвате
+        box.color = '#2ed573';
+    }
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (box.isDragging) {
+        const mouse = getMousePos(e);
+        // Запоминаем старую позицию перед обновлением
+        box.lastX = box.x;
+        box.lastY = box.y;
+        
+        box.x = mouse.x - box.size / 2;
+        box.y = mouse.y - box.size / 2;
     }
 });
 
 window.addEventListener('mouseup', () => {
     if (box.isDragging) {
-        // Вычисляем скорость броска на основе последнего движения
+        // Рассчитываем инерцию броска
         box.vx = box.x - box.lastX;
         box.vy = box.y - box.lastY;
         box.isDragging = false;
@@ -51,21 +63,30 @@ window.addEventListener('mouseup', () => {
     }
 });
 
-
-window.addEventListener('mouseup', () => {
-    box.isDragging = false;
-    box.color = '#ff4757'; // Снова красный
-});
-
 function update() {
     if (!box.isDragging) {
+        // Физика падения и движения
         box.vy += box.gravity;
+        box.x += box.vx;
         box.y += box.vy;
 
+        // Трение (чтобы он не скользил вечно)
+        box.vx *= 0.98;
+
+        // Столкновение с полом
         if (box.y + box.size > canvas.height) {
             box.y = canvas.height - box.size;
-            box.vy *= -0.5;
+            box.vy *= box.bounce;
             if (Math.abs(box.vy) < 1) box.vy = 0;
+        }
+        
+        // Столкновение со стенами
+        if (box.x < 0) {
+            box.x = 0;
+            box.vx *= box.bounce;
+        } else if (box.x + box.size > canvas.width) {
+            box.x = canvas.width - box.size;
+            box.vx *= box.bounce;
         }
     }
 }
