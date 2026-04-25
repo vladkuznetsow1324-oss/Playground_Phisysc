@@ -16,6 +16,9 @@ let box = {
     isDragging: false,
     vy: 0,
     gravity: 0.8
+    vx: 0, // скорость по горизонтали
+    lastY: 0
+    lastX:, 0
 };
 
 // Исправленный расчет координат мыши
