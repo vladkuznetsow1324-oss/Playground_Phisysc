@@ -1,19 +1,51 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Физическая песочница</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #2f3542; }
-        canvas { display: block; background: #ffffff; margin: 20px auto; border-radius: 8px; }
-    </style>
-</head>
-<body>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+// Растягиваем холст на всё окно
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    <!-- Подключаем твой JS-файл -->
-    <script src="script.js"></script>
+// Настройки кубика
+let box = {
+    x: 100,
+    y: 100,
+    size: 60,
+    color: '#ff4757',
+    isDragging: false
+};
+
+function isMouseInBox(mx, my, b) {
+    return mx > b.x && mx < b.x + b.size && my > b.y && my < b.y + b.size;
+}
+
+canvas.addEventListener('mousedown', (e) => {
+    if (isMouseInBox(e.offsetX, e.offsetY, box)) {
+        box.isDragging = true;
+    }
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (box.isDragging) {
+        box.x = e.offsetX - box.size / 2;
+        box.y = e.offsetY - box.size / 2;
+    }
+});
+
+window.addEventListener('mouseup', () => {
+    box.isDragging = false;
+});
+
+// Функция отрисовки
+function draw() {
+    // Очищаем экран под размер окна
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
     
-</body>
-</html>
+    // Рисуем кубик
+    ctx.fillStyle = box.color;
+    ctx.fillRect(box.x, box.y, box.size, box.size);
+
+    requestAnimationFrame(draw);
+}
+
+// Запускаем
+draw();
