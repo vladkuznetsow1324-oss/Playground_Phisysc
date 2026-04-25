@@ -6,60 +6,28 @@ canvas.height = window.innerHeight;
 
 let box = {
     x: 100,
-    y: 100,
+    y: 0, // Начнем с самого верха
     size: 60,
-    color: '#ff4757',
-    isDragging: false,
-    vy: 0,          // Скорость по вертикали
-    gravity: 0.8    // Сделал гравитацию чуть сильнее для наглядности
+    vy: 2 // Сделаем постоянную скорость падения без гравитации для теста
 };
 
-function isMouseInBox(mx, my, b) {
-    return mx > b.x && mx < b.x + b.size && my > b.y && my < b.y + b.size;
-}
-
-canvas.addEventListener('mousedown', (e) => {
-    if (isMouseInBox(e.offsetX, e.offsetY, box)) {
-        box.isDragging = true;
-        box.vy = 0; 
-    }
-});
-
-window.addEventListener('mousemove', (e) => {
-    if (box.isDragging) {
-        box.x = e.offsetX - box.size / 2;
-        box.y = e.offsetY - box.size / 2;
-        box.vy = 0; // Пока держим, скорость не растет
-    }
-});
-
-window.addEventListener('mouseup', () => {
-    box.isDragging = false;
-});
-
-// ГЛАВНОЕ: расчет движения
-function update() {
-    if (!box.isDragging) {
-        box.vy += box.gravity; // Гравитация тянет вниз
-        box.y += box.vy;       // Применяем скорость к координате
-
-        // Проверка столкновения с полом
-        if (box.y + box.size > canvas.height) {
-            box.y = canvas.height - box.size;
-            box.vy *= -0.5; // Отскок
-        }
-    }
-}
-
 function draw() {
-    update(); // <--- ОБЯЗАТЕЛЬНО вызываем расчет физики перед рисованием
+    // Очистка
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    ctx.clearRect(0, 0, canvas.width, canvas.height); 
-    ctx.fillStyle = box.color;
+    // Двигаем кубик вниз
+    box.y += box.vy;
+    
+    // Если улетел за экран — возвращаем наверх
+    if (box.y > canvas.height) box.y = -box.size;
+
+    // Рисуем
+    ctx.fillStyle = 'red';
     ctx.fillRect(box.x, box.y, box.size, box.size);
+
+    console.log("Кубик сейчас на высоте:", box.y); // Это появится в консоли (F12)
 
     requestAnimationFrame(draw);
 }
 
 draw();
-
