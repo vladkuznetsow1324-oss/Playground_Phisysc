@@ -41,13 +41,16 @@ canvas.addEventListener('mousedown', (e) => {
     }
 });
 
-window.addEventListener('mousemove', (e) => {
+window.addEventListener('mouseup', () => {
     if (box.isDragging) {
-        const mouse = getMousePos(e);
-        box.x = mouse.x - box.size / 2;
-        box.y = mouse.y - box.size / 2;
+        // Вычисляем скорость броска на основе последнего движения
+        box.vx = box.x - box.lastX;
+        box.vy = box.y - box.lastY;
+        box.isDragging = false;
+        box.color = '#ff4757';
     }
 });
+
 
 window.addEventListener('mouseup', () => {
     box.isDragging = false;
