@@ -11,7 +11,7 @@ let box = {
     color: '#ff4757',
     isDragging: false,
     vy: 0,          // Скорость по вертикали
-    gravity: 0.5    // Сила гравитации
+    gravity: 0.8    // Сделал гравитацию чуть сильнее для наглядности
 };
 
 function isMouseInBox(mx, my, b) {
@@ -21,7 +21,7 @@ function isMouseInBox(mx, my, b) {
 canvas.addEventListener('mousedown', (e) => {
     if (isMouseInBox(e.offsetX, e.offsetY, box)) {
         box.isDragging = true;
-        box.vy = 0; // Обнуляем скорость при захвате
+        box.vy = 0; 
     }
 });
 
@@ -29,6 +29,7 @@ window.addEventListener('mousemove', (e) => {
     if (box.isDragging) {
         box.x = e.offsetX - box.size / 2;
         box.y = e.offsetY - box.size / 2;
+        box.vy = 0; // Пока держим, скорость не растет
     }
 });
 
@@ -36,25 +37,24 @@ window.addEventListener('mouseup', () => {
     box.isDragging = false;
 });
 
+// ГЛАВНОЕ: расчет движения
 function update() {
     if (!box.isDragging) {
-        // 1. Применяем гравитацию к скорости
-        box.vy += box.gravity;
-        // 2. Двигаем кубик вниз
-        box.y += box.vy;
+        box.vy += box.gravity; // Гравитация тянет вниз
+        box.y += box.vy;       // Применяем скорость к координате
 
-        // 3. Проверка пола (чтобы не улетел вниз)
+        // Проверка столкновения с полом
         if (box.y + box.size > canvas.height) {
             box.y = canvas.height - box.size;
-            box.vy *= -0.6; // Отскок (минус меняет направление, 0.6 — гасит энергию)
+            box.vy *= -0.5; // Отскок
         }
     }
 }
 
 function draw() {
-    update(); // Сначала считаем физику
-    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+    update(); // <--- ОБЯЗАТЕЛЬНО вызываем расчет физики перед рисованием
     
+    ctx.clearRect(0, 0, canvas.width, canvas.height); 
     ctx.fillStyle = box.color;
     ctx.fillRect(box.x, box.y, box.size, box.size);
 
@@ -62,3 +62,4 @@ function draw() {
 }
 
 draw();
+
